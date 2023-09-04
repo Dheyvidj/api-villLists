@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique()
+  name      String
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  role      String
+}
+
+model Product {
+  id            Int                   @id @default(autoincrement())
+  name          String                @unique()
+  description   String?
+  value         Boolean
+  measurement   String
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt()
+  active        Boolean               @default(true)
+  category      Category              @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  shoppingLists ShoppingListProduct[]
+}
+
+model ShoppingList {
+  id          Int                   @id @default(autoincrement())
+  status      String                @default("typed")
+  observation String
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt()
+  products    ShoppingListProduct[]
+}
+
+model ShoppingListProduct {
+  id             Int          @id @default(autoincrement())
+  quantity       Int
+  checked        Boolean      @default(false)
+  productId      Int
+  shoppingListId Int
+  product        Product      @relation(fields: [productId], references: [id])
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id])
+
+  @@unique([productId, shoppingListId])
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique()
+  description String
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt()
+  products    Product[]
+}
